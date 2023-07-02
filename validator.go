@@ -1,7 +1,7 @@
 package main
 
 /*
-	Parentheses validator based on linked list
+	Parentheses validator based on reversed linked list with
 */
 
 var parenthesisDict = map[rune]rune{
@@ -21,48 +21,57 @@ type closingRune struct {
 	next *closingRune
 }
 
-func (crune *closingRune) check(r rune) (result bool) {
-	return r == crune.val
+type List struct {
+	head *closingRune
 }
 
-func (crune *closingRune) push(r rune) *closingRune {
-	return &closingRune{
-		val:  r,
-		next: crune,
+// inserts new closing rune at the head of the list
+func (l *List) Insert(r rune) {
+	newHead := &closingRune{val: r, next: nil}
+	if l.head == nil {
+		l.head = newHead
+	} else {
+		newHead.next = l.head
+		l.head = newHead
 	}
 }
 
-func isValid(s string) bool {
+// checks if rune at the head of the list is equal incoming rune
+// if so, pops the head and returns true
+// otherwise returns false
+func (l *List) Check(r rune) bool {
+	if l.head == nil {
+		return false
+	}
+	if l.head.val == r {
+		if l.head.next != nil {
+			l.head = l.head.next
+		} else {
+			l.head = nil
+		}
+		return true
+	}
+	return false
+}
 
-	var closeWatcher *closingRune
+func isValid(s string) bool {
+	if len(s) == 0 {
+		return true
+	}
+
+	l := &List{}
 
 	for _, symb := range s {
 		if nextClosingRune, ok := parenthesisDict[symb]; ok {
-			if closeWatcher == nil {
-				closeWatcher = &closingRune{
-					val: nextClosingRune,
-				}
-			} else {
-				closeWatcher = closeWatcher.push(nextClosingRune)
-			}
+			l.Insert(nextClosingRune)
 		} else {
 			if _, ok := closingMap[symb]; ok {
-				if closeWatcher == nil {
-					return false
-				}
-				if closeWatcher.check(symb) {
-					if closeWatcher.next != nil {
-						*closeWatcher = *(closeWatcher.next)
-					} else {
-						closeWatcher = nil
-					}
-					continue
-				} else {
+				if !l.Check(symb) {
 					return false
 				}
 			}
 		}
 	}
 
-	return closeWatcher == nil
+	return l.head == nil
 }

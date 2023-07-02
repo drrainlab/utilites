@@ -19,9 +19,16 @@ func Test_isValid(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "invalid",
+			name: "invalid 1",
 			args: args{
 				"(([test{sub_test()}][]{}())",
+			},
+			want: false,
+		},
+		{
+			name: "invalid 2",
+			args: args{
+				"(]([test{sub_test()}][]{}())",
 			},
 			want: false,
 		},
